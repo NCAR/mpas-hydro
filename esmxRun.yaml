@@ -1,0 +1,22 @@
+ESMX:
+  App:
+    startTime: 2012-10-24T00:00:00
+    endTime: 2012-10-24T01:00:00
+
+  Driver:
+    componentList: [MPAS] # , HYDRO, LSM]
+    attributes:
+      verbosity: high
+    runSequence: |
+      MPAS
+      # LSM
+      # HYDRO
+
+MPAS:
+  model: mpas_atm_nuopc
+
+HYDRO:
+  model: wrfhydro_nuopc
+
+# LSM:
+#   model: noahmp_nuopc
