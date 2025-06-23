@@ -1,5 +1,10 @@
 # MPAS-Hydro
 MPAS-Hydro is a coupling of the [MPAS](https://github.com/MPAS-Dev/MPAS-Model) Atmosphere and [WRF-Hydro](https://github.com/NCAR/wrf_hydro_nwm_public).
+The coupling mechanism uses [Earth System Modeling Framework](https://earthsystemmodeling.org/)
+(ESMF) and the [National Unified Operational Prediction Capability](https://earthsystemmodeling.org/nuopc)
+(NUOPC) interoperability layer, also reffered to as a cap.
+
+
 
 ## Build
 MPAS-Hydro couples using the ESMX infrastructure.
