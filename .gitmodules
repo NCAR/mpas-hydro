@@ -6,3 +6,6 @@
 	path = src/mpas
         branch = mpas-hydro
 	url = git@github.com:NCAR/MPAS-Model-NUOPC-dev.git
+[submodule "src/noahmp"]
+	path = src/noahmp
+	url = git@github.com:NOAA-EMC/noahmp.git
