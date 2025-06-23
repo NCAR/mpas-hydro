@@ -23,6 +23,8 @@ $ AUTOCLEAN=true \
   ESMX_Builder -v --build-jobs=4 --build-type=Debug
 ```
 
+
+## Run Instructions
 Setup a case, one could download a [MPAS testcase](https://www2.mmm.ucar.edu/projects/mpas/test_cases/v7.0/).
 Make sure that `esmxRun.yaml, init_atmosphere_model` and `mpas_hydro` are present in the directory.
 
