@@ -7,6 +7,9 @@
   - [ ] two-way interfacing: WRF-Hydro runs the NoahMP land model
   <!-- - [ ] one-way interfacing: WRF-Hydro passes routing data -->
 
-- [ ] Testcases: Frontrange testcase
-  - [ ] more files need to be added
-  - [ ] double check it works and README instructions are updated
+
+- [ ] Testing
+  - [ ] Testcases: Frontrange testcase
+    - [ ] more files need to be added
+    - [ ] double check it works and README instructions are updated
+  - [ ] Github Actions
