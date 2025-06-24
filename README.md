@@ -46,6 +46,15 @@ $ AUTOCLEAN=true \
   ESMX_Builder -v --build-jobs=4 --build-type=Debug
 ```
 
+The user can also use the provided `Makefile` in the top directory.
+```
+$ make
+or
+$ make build
+```
+
+
+
 
 ## Run Instructions
 Setup a case, one could download a [MPAS testcase](https://www2.mmm.ucar.edu/projects/mpas/test_cases/v7.0/).

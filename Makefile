@@ -1,0 +1,17 @@
+np=4
+
+.PHONY: build
+
+all: build
+
+build:
+	AUTOCLEAN=true \
+	PIO=${NCAR_ROOT_PARALLELIO} \
+	PnetCDF_ROOT=${NCAR_ROOT_PARALLEL_NETCDF} \
+	PnetCDF_MODULE_DIR=${NCAR_ROOT_PARALLEL_NETCDF}/include \
+	USE_MPI_F08=0 \
+	MPAS_HYDRO=true \
+	ESMX_Builder -v --build-jobs=$(np) --build-type=Debug
+
+clean:
+	rm -rf build/ install/*
