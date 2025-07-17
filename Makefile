@@ -11,7 +11,7 @@ build:
 	PnetCDF_MODULE_DIR=${NCAR_ROOT_PARALLEL_NETCDF}/include \
 	USE_MPI_F08=0 \
 	MPAS_HYDRO=true \
-	ESMX_Builder -v --build-jobs=$(np) --build-type=Debug
+	ESMX_Builder -v --build-jobs=$(np) --build-type=Release
 
 clean:
 	rm -rf build/ install/*

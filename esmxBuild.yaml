@@ -1,15 +1,14 @@
 application:
-  cmake_build_args: -DMPAS_HYDRO=ON -DWRF_HYDRO_NUOPC=1 -DMPAS_USE_MPI_F08=OFF -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DMPAS_DOUBLE_PRECISION=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MESSAGE_LOG_LEVEL=DEBUG -DCMAKE_EXE_LINKER_FLAGS="-lpiof" -DCMAKE_PREFIX_PATH=/glade/u/apps/derecho/24.12/spack/opt/spack/parallelio/2.6.3/cray-mpich/8.1.29/gcc/12.4.0/vgrj
+  cmake_build_args: -DMPAS_HYDRO=ON -DWRF_HYDRO_NUOPC=1 -DMPAS_USE_MPI_F08=OFF -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DMPAS_DOUBLE_PRECISION=OFF -DCMAKE_EXE_LINKER_FLAGS="-lpiof" -DCMAKE_PREFIX_PATH=/glade/u/apps/derecho/24.12/spack/opt/spack/parallelio/2.6.3/cray-mpich/8.1.29/gcc/12.4.0/vgrj
   link_libraries: piof
   exe_name: mpas_hydro
 
 components:
   mpas_atm_nuopc:
     source_dir: src/mpas
-
   wrfhydro_nuopc:
     source_dir: src/hydro
 
-  noahmp:
-    source_dir: src/noahmp
-    fort_module: lnd_comp_nuopc.mod
+  # noahmp:
+  #   source_dir: src/noahmp
+  #   fort_module: lnd_comp_nuopc.mod
