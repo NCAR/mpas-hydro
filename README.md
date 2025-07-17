@@ -67,6 +67,31 @@ Run MPAS Hydro
 $ mpirun -np 4 ./mpas_hydro
 ```
 
+## Visualize Output
+### Requirements
+- [UXarray](https://uxarray.readthedocs.io/en/latest/)
+- [JupyterLab](https://jupyterlab.readthedocs.io/en/latest/)
+
+```
+$ conda create --prefix /path/to/conda_env/uxarray
+$ conda activate uxarray
+$ conda install -c conda-forge uxarray jupyterlab
+```
+
+### Visualization
+Start JupyterLab
+```
+$ jupyter lab
+```
+
+Edit a jupyter notebook to have something similar the following
+```
+import uxarray as ux
+uxds_orig = ux.open_dataset("x1.40962.grid.nc", "output.nc")
+uxds = uxds_orig.isel(Time=0)
+uxds.uxgrid = uxds_orig.uxgrid  # reattach grid after selection for time
+uxds['ter'].plot()
+```
 
 ## NUOPC Cap Exchange
 - [ ] Add list of variables being exchanged for two and one way coupling
