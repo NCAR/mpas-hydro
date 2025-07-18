@@ -1,7 +1,7 @@
 ESMX:
   App:
-    startTime: 2012-10-24T00:00:00
-    stopTime: 2012-10-24T01:00:00
+    startTime: 0000-01-01T00:00:00
+    stopTime:  0000-01-01T01:00:00
 
   Driver:
     componentList: [MPAS] # , HYDRO, LSM]
