@@ -122,14 +122,15 @@ mpas-model/
 ## Running Idealized Case
 Following instructions from [MPAS Tutorial 2024](https://www2.mmm.ucar.edu/projects/mpas/tutorial/Howard2024/index.html)
 
-```
-JW Baroclinic for now, Front Range, CO in the Future
 <!-- Front Range, CO (70.2 MB) -->
 
 <!-- Setup Testcase -->
 <!-- $ wget https://github.com/NCAR/wrf_hydro_nwm_public/releases/download/v5.4.0/front_range_CO_example_testcase_coupled.tar.gz -->
 <!-- $ tar zxf front_range_CO_example_testcase_coupled.tar.gz -->
 <!-- $ cd example_case_coupled -->
+
+```
+JW Baroclinic for now, Front Range, CO in the Future
 
 Setup Testcase
 $ wget https://www2.mmm.ucar.edu/projects/mpas/test_cases/v7.0/jw_baroclinic_wave.tar.gz
