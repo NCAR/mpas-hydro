@@ -123,16 +123,23 @@ mpas-model/
 Following instructions from [MPAS Tutorial 2024](https://www2.mmm.ucar.edu/projects/mpas/tutorial/Howard2024/index.html)
 
 ```
-Front Range, CO (70.2 MB)
+JW Baroclinic for now, Front Range, CO in the Future
+<!-- Front Range, CO (70.2 MB) -->
+
+<!-- Setup Testcase -->
+<!-- $ wget https://github.com/NCAR/wrf_hydro_nwm_public/releases/download/v5.4.0/front_range_CO_example_testcase_coupled.tar.gz -->
+<!-- $ tar zxf front_range_CO_example_testcase_coupled.tar.gz -->
+<!-- $ cd example_case_coupled -->
 
 Setup Testcase
-$ wget https://github.com/NCAR/wrf_hydro_nwm_public/releases/download/v5.4.0/front_range_CO_example_testcase_coupled.tar.gz
-$ tar zxf front_range_CO_example_testcase_coupled.tar.gz
-$ cd example_case_coupled
+$ wget https://www2.mmm.ucar.edu/projects/mpas/test_cases/v7.0/jw_baroclinic_wave.tar.gz
+$ tar zxf jw_baroclinic_wave.tar.gz
+$ cd jw_baroclinic_wave/* .
+
 
 Symlink the executables
-$ ln -s ../init_atmosphere_model .
-$ ln -s ../mpas_hydro
+$ ln -s ../install/bin/init_atmosphere_model .
+$ ln -s ../install/bin/mpas_hydro
 
 Run, choose an np such that the file frontrange.graph.info.part.{np} exists
 Note, frontrange is small enough to run in serial, without MPI
