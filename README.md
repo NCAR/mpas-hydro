@@ -118,16 +118,67 @@ mpas-model/
     └──testcases/
 ```
 
+# Data Fields
+
+## WRF-Hydro Input Fields from MPAS
+Variables in file `src/core_atmosphere/physics/mpas_atmphys_vars.F` and the NoahMP variables are defined in
+`src/core_atmosphere/physics/physics_noahmp/drivers/mpas/NoahmpIOVarType.F90`
+
+|------------------------------------------------|-----------|--------------------------------|---------------------|
+| WRF-Hydro Name                                 | MPAS Name | MPAS Desciption                | Units               |
+|------------------------------------------------|-----------|--------------------------------|---------------------|
+| `inst_total_soil_moisture_content`             | ``        |                                |                     |
+| `inst_soil_moisture_content`                   | ``        |                                |                     |
+| `inst_soil_temperature`                        | ``        |                                |                     |
+| `liquid_fraction_of_soil_moisture_layer_{1-4}` | `sh2o_p`  | unfrozed soil moisture content | volumetric fraction |
+| `soil_moisture_fraction_layer_{1-4}`           | `smois_p` | soil moisture                  | volumetric fraction |
+| `soil_temperature_layer_{1-4}`                 | `tslb_p`  | soil temperature               | K                   |
+| `time_step_infiltration_excess`                | ``        |                                |                     |
+| `soil_column_drainage`                         | ``        |                                |                     |
+|------------------------------------------------|-----------|--------------------------------|---------------------|
+
+Variables needed
+
+|-----------------------|------------------|---------------------------------------|-------|
+| WRF-Hydro Name        | MPAS NoahMP Name | Desciption                            | Units |
+|-----------------------|------------------|---------------------------------------|-------|
+| `smc` or `smc{1-4}`   | `smois`          | total soil moisture content, 4 layers |       |
+| `slc` or `sh2ox{1-4}` | `sh2o`           | liquid soil moisture content          |       |
+| `stc` or `stc{1-4}`   | `tslb`           | soil temperature                      | K     |
+| `infxsrt`             | ``               | infiltration excess                   |       |
+| `soldrain`            | ``               | soil drainage                         |       |
+|-----------------------|------------------|---------------------------------------|-------|
+
+|------------------|-----------------------------------------|------|
+| MPAS NoahMP Name | Description                             | Dims |
+|------------------|-----------------------------------------|------|
+| smoiseq          | volumetric soil moisture [m3/m3]        | 2    |
+| smois            | volumetric soil moisture [m3/m3]        | 2    |
+| sh2o             | volumetric liquid soil moisture [m3/m3] | 2    |
+| tslb             | soil temperature [K]                    | 2    |
+|                  |                                         |      |
+|------------------|-----------------------------------------|------|
+
+
 # Tutorial
+## Running Front Range Case
+Front Range, CO (70.2 MB)
+
+```
+Setup Testcase
+$ wget https://github.com/NCAR/wrf_hydro_nwm_public/releases/download/v5.4.0/front_range_CO_example_testcase_coupled.tar.gz
+$ tar zxf front_range_CO_example_testcase_coupled.tar.gz
+$ cd example_case_coupled
+$ TODO: FILL IN MPAS INFO
+
+Partition with METIS where np is equal to the number or MPI processes to use
+$ gpmetis -niter=200 frontrange.graph.info [np]
+```
+
+
 ## Running Idealized Case
 Following instructions from [MPAS Tutorial 2024](https://www2.mmm.ucar.edu/projects/mpas/tutorial/Howard2024/index.html)
 
-<!-- Front Range, CO (70.2 MB) -->
-
-<!-- Setup Testcase -->
-<!-- $ wget https://github.com/NCAR/wrf_hydro_nwm_public/releases/download/v5.4.0/front_range_CO_example_testcase_coupled.tar.gz -->
-<!-- $ tar zxf front_range_CO_example_testcase_coupled.tar.gz -->
-<!-- $ cd example_case_coupled -->
 
 ```
 JW Baroclinic for now, Front Range, CO in the Future
