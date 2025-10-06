@@ -2,34 +2,38 @@ ESMX:
   App:
     startTime: 2011-08-26T00:00:00
     stopTime:  2011-08-26T00:02:00
+    # stopTime:  2011-08-26T00:10:00
     logFlush: true
     # startTime: 0000-01-01T00:00:00
     # stopTime:  0000-01-01T01:00:00
 
   Driver:
-    componentList: [ MPAS, HYDRO ] #[MPAS, HYDRO, LSM]
+    componentList: [ MPAS, HYDRO ]
     attributes:
-      Verbosity: high
-      # diagnostic: max
+      Verbosity: "high"
+      Diagnostic: "high"
     runSequence: |
         @20
+        HYDRO -> MPAS
+        MPAS
         MPAS -> HYDRO
         HYDRO
-        MPAS
         @
-        # HYDRO -> MPAS
 
 MPAS:
   model: mpas_atm_nuopc
   attributes:
     # Verbosity: "low"
-    Verbosity: max
+    # Verbosity: max
 
 HYDRO:
   model: wrfhydro_nuopc
   attributes:
+    # initialize_export: 3
+    # Diagnostic: "high"
+    # Diagnostic: "65536" # this reaches it
     # Verbosity: "65535"
-    Verbosity: max
+    # Verbosity: max
     # Verbosity: "1023" # low
 
 # LSM:
