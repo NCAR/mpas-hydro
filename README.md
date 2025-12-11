@@ -124,18 +124,27 @@ mpas-model/
 Variables in file `src/core_atmosphere/physics/mpas_atmphys_vars.F` and the NoahMP variables are defined in
 `src/core_atmosphere/physics/physics_noahmp/drivers/mpas/NoahmpIOVarType.F90`
 
-|------------------------------------------------|-----------|--------------------------------|---------------------|
-| WRF-Hydro Name                                 | MPAS Name | MPAS Desciption                | Units               |
-|------------------------------------------------|-----------|--------------------------------|---------------------|
-| `inst_total_soil_moisture_content`             | ``        |                                |                     |
-| `inst_soil_moisture_content`                   | ``        |                                |                     |
-| `inst_soil_temperature`                        | ``        |                                |                     |
-| `liquid_fraction_of_soil_moisture_layer_{1-4}` | `sh2o_p`  | unfrozed soil moisture content | volumetric fraction |
-| `soil_moisture_fraction_layer_{1-4}`           | `smois_p` | soil moisture                  | volumetric fraction |
-| `soil_temperature_layer_{1-4}`                 | `tslb_p`  | soil temperature               | K                   |
-| `time_step_infiltration_excess`                | ``        |                                |                     |
-| `soil_column_drainage`                         | ``        |                                |                     |
-|------------------------------------------------|-----------|--------------------------------|---------------------|
+
+
+|------------------------------------------------+-------------+--------------------------------+---------------------+----------------------------------|
+| WRF-Hydro Variable Name                        | MPAS Name   | MPAS Desciption                | Units               | Regridding Method                |
+|------------------------------------------------+-------------+--------------------------------+---------------------+----------------------------------|
+| `inst_total_soil_moisture_content`             | ``          |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
+| `inst_soil_moisture_content`                   | ``          |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
+| `inst_soil_temperature`                        | ``          |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
+| `liquid_fraction_of_soil_moisture_layer_{1-4}` | `sh2o_p`    | unfrozed soil moisture content | volumetric fraction | `ESMF_REGRIDMETHOD_BILINEAR`     |
+| `soil_column_drainage`                         | ``          |                                |                     |                                  |
+| `soil_moisture_fraction_layer_{1-4}`           | `smois_p`   | soil moisture                  | volumetric fraction | `ESMF_REGRIDMETHOD_BILINEAR`     |
+| `soil_porosity`                                | `smcmax1`   |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
+| `soil_temperature_layer_{1-4}`                 | `tslb_p`    | soil temperature               | K                   | `ESMF_REGRIDMETHOD_BILINEAR`     |
+| `subsurface_runoff_accumulated`                | `udrunoff`  |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
+| `surface_runoff_accumulated`                   | `sfcrunoff` |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
+| `surface_water_depth`                          | `sfchead`   |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
+| `time_step_infiltration_excess`                | `soldrain`  |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
+| `vegetation_type`                              | `vegtyp`    |                                |                     | `ESMF_REGRIDMETHOD_NEAREST_STOD` |
+|------------------------------------------------+-------------+--------------------------------+---------------------+----------------------------------|
+
+
 
 Variables needed
 
@@ -158,6 +167,60 @@ Variables needed
 | tslb             | soil temperature [K]                    | 2    |
 |                  |                                         |      |
 |------------------|-----------------------------------------|------|
+
+
+## Geogrid File Creation from MPAS + NoahMP
+The geogrid file is created at runtime by using importing variables from MPAS
+
+| MPAS Variable | description                 | Hydro Geo Var | description                   | Regrid Method |
+|---------------|-----------------------------|---------------|-------------------------------|---------------|
+| isltyp        | soil type index             | SCT_DOM       | Dominant top layer soil class | Nearest Stod  |
+| ivgtyp        | vegetation type index       | VEGTYP        | Vegetation type               | Nearest Stod  |
+| ivgtyp        | vegetation type index       | LU\_INDEX     | Land cover type               | Nearest Stod  |
+| landmask      |                             | LANDMASK      |                               | Nearest Stod  |
+| ter           | terrain height, in .init.nc | HGT\_M        | Elevation                     | Bilinear      |
+| latCell       | Latitude                    | XLAT\_M       | Latitude                      | Bilinear      |
+| lonCell       | Longitude                   | XLONG\_M      | Longitude                     | Bilinear      |
+
+```mermaid
+flowchart TD
+  working(((WORKING))) --> initp1
+  initp1 -->  wrfhydro_write_geo_file
+
+
+  wrfhydro_write_geo_file --> nearest_stod
+  nearest_stod --> isltyp
+  nearest_stod --> ivgtyp
+  nearest_stod --> ivgtyp
+  nearest_stod --> landmask
+  wrfhydro_write_geo_file --> bilinear
+  bilinear --> ter
+  bilinear --> latCell
+  bilinear --> lonCell
+```
+
+```mermaid
+flowchart TD
+  frontrange(((frontrange.static.nc)))
+  d01(((frontrange.d01.nc)))
+  frontrange --> isltyp
+  frontrange --> ivgtyp
+  frontrange --> ivgtyp
+  frontrange --> landmask
+  isltyp -- nearest_stod --> d01
+  ivgtyp -- nearest_stod --> d01
+  ivgtyp -- nearest_stod --> d01
+  landmask -- nearest_stod --> d01
+
+
+  frontrange --> ter
+  frontrange --> latCell
+  frontrange --> lonCell
+  ter -- bilinear --> d01
+  latCell -- bilinear --> d01
+  lonCell -- bilinear --> d01
+```
+
 
 
 # Tutorial
