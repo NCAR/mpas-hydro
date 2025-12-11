@@ -126,7 +126,6 @@ Variables in file `src/core_atmosphere/physics/mpas_atmphys_vars.F` and the Noah
 
 
 
-|------------------------------------------------+-------------+--------------------------------+---------------------+----------------------------------|
 | WRF-Hydro Variable Name                        | MPAS Name   | MPAS Desciption                | Units               | Regridding Method                |
 |------------------------------------------------+-------------+--------------------------------+---------------------+----------------------------------|
 | `inst_total_soil_moisture_content`             | ``          |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
@@ -142,23 +141,20 @@ Variables in file `src/core_atmosphere/physics/mpas_atmphys_vars.F` and the Noah
 | `surface_water_depth`                          | `sfchead`   |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
 | `time_step_infiltration_excess`                | `soldrain`  |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
 | `vegetation_type`                              | `vegtyp`    |                                |                     | `ESMF_REGRIDMETHOD_NEAREST_STOD` |
-|------------------------------------------------+-------------+--------------------------------+---------------------+----------------------------------|
 
 
 
 Variables needed
 
-|-----------------------|------------------|---------------------------------------|-------|
 | WRF-Hydro Name        | MPAS NoahMP Name | Desciption                            | Units |
 |-----------------------|------------------|---------------------------------------|-------|
 | `smc` or `smc{1-4}`   | `smois`          | total soil moisture content, 4 layers |       |
 | `slc` or `sh2ox{1-4}` | `sh2o`           | liquid soil moisture content          |       |
 | `stc` or `stc{1-4}`   | `tslb`           | soil temperature                      | K     |
-| `infxsrt`             | ``               | infiltration excess                   |       |
-| `soldrain`            | ``               | soil drainage                         |       |
-|-----------------------|------------------|---------------------------------------|-------|
+| `infxsrt`             |                  | infiltration excess                   |       |
+| `soldrain`            |                  | soil drainage                         |       |
 
-|------------------|-----------------------------------------|------|
+
 | MPAS NoahMP Name | Description                             | Dims |
 |------------------|-----------------------------------------|------|
 | smoiseq          | volumetric soil moisture [m3/m3]        | 2    |
@@ -166,7 +162,6 @@ Variables needed
 | sh2o             | volumetric liquid soil moisture [m3/m3] | 2    |
 | tslb             | soil temperature [K]                    | 2    |
 |                  |                                         |      |
-|------------------|-----------------------------------------|------|
 
 
 ## Geogrid File Creation from MPAS + NoahMP
