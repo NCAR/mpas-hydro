@@ -177,22 +177,6 @@ The geogrid file is created at runtime by using importing variables from MPAS
 | latCell       | Latitude                    | XLAT\_M       | Latitude                      | Bilinear      |
 | lonCell       | Longitude                   | XLONG\_M      | Longitude                     | Bilinear      |
 
-```mermaid
-flowchart TD
-  working(((WORKING))) --> initp1
-  initp1 -->  wrfhydro_write_geo_file
-
-
-  wrfhydro_write_geo_file --> nearest_stod
-  nearest_stod --> isltyp
-  nearest_stod --> ivgtyp
-  nearest_stod --> ivgtyp
-  nearest_stod --> landmask
-  wrfhydro_write_geo_file --> bilinear
-  bilinear --> ter
-  bilinear --> latCell
-  bilinear --> lonCell
-```
 
 ```mermaid
 flowchart TD
@@ -202,18 +186,26 @@ flowchart TD
   frontrange --> ivgtyp
   frontrange --> ivgtyp
   frontrange --> landmask
-  isltyp -- nearest_stod --> d01
-  ivgtyp -- nearest_stod --> d01
-  ivgtyp -- nearest_stod --> d01
-  landmask -- nearest_stod --> d01
-
-
   frontrange --> ter
   frontrange --> latCell
   frontrange --> lonCell
-  ter -- bilinear --> d01
-  latCell -- bilinear --> d01
-  lonCell -- bilinear --> d01
+
+  isltyp -- nearest_stod --> SCT_DOM
+  ivgtyp -- nearest_stod --> VEGTYP
+  ivgtyp -- nearest_stod --> LU_INDEX
+  landmask -- nearest_stod --> LANDMASK
+  ter -- bilinear --> HGT_M
+  latCell -- bilinear --> XLAT_M
+  lonCell -- bilinear --> XLONG_M
+
+  HGT_M --> d01
+  SCT_DOM --> d01
+  XLAT_M --> d01
+  XLONG_M --> d01
+  VEGTYP --> d01
+  LU_INDEX --> d01
+  LANDMASK --> d01
+
 ```
 
 
