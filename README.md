@@ -127,7 +127,7 @@ Variables in file `src/core_atmosphere/physics/mpas_atmphys_vars.F` and the Noah
 
 
 | WRF-Hydro Variable Name                        | MPAS Name   | MPAS Desciption                | Units               | Regridding Method                |
-|------------------------------------------------+-------------+--------------------------------+---------------------+----------------------------------|
+|------------------------------------------------|-------------|--------------------------------|---------------------|----------------------------------|
 | `inst_total_soil_moisture_content`             | ``          |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
 | `inst_soil_moisture_content`                   | ``          |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
 | `inst_soil_temperature`                        | ``          |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
