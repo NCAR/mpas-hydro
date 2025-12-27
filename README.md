@@ -14,7 +14,7 @@ Note, the build instructions are specific to Derecho at the current moment.
 - MPI
 - Fortran NetCDF
 - ParallelIO
-- ESMF
+- ESMF: (ESMF Build Instructions)[#ESMF-Build-Instructions]
 - OpenBLAS
 - CMake
 
@@ -25,6 +25,8 @@ $ ml purge
 $ ml ncarenv/24.12 gcc/12.4.0 ncarcompilers cray-mpich cmake openblas parallelio
 $ ml esmf/8.8.1 netcdf-mpi/4.9.3 parallel-netcdf hdf5-mpi
 ```
+
+
 
 
 ### Retrieve Code
@@ -66,6 +68,7 @@ $ ./init_atmosphere_model
 Run MPAS Hydro
 $ mpirun -np 4 ./mpas_hydro
 ```
+
 
 ## Visualize Output
 ### Requirements
@@ -247,4 +250,25 @@ Run, choose an np such that the file frontrange.graph.info.part.{np} exists
 Note, frontrange is small enough to run in serial, without MPI
 $ mpiexec -np 4 ./init_atmosphere_model
 $ mpiexec -np 4 ./mpas_hydro
+```
+
+# Miscellaneous Instructions
+## ESMF Build Instructions
+Edit `ESMF_INSTALL_PREFIX` to change the install path.
+```
+$ wget https://github.com/esmf-org/esmf/archive/refs/tags/v8.8.1.tar.gz
+$ tar zxf v8.8.1.tar.gz
+$ cd esmf-8.8.1
+$ export \
+  ESMF_COMM=openmpi \
+  ESMF_BOPT=O \
+  ESMF_COMPILER=gfortran \
+  ESMF_OS=Linux \
+  ESMF_NETCDF=nc-config \
+  ESMF_INSTALL_MODDIR=mod \
+  ESMF_INSTALL_BINDIR=bin \
+  ESMF_INSTALL_LIBDIR=lib \
+  ESMF_DIR=$(pwd)
+$ make -j 4
+$ make install
 ```
