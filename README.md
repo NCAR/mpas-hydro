@@ -158,13 +158,13 @@ Variables needed
 | `soldrain`            |                  | soil drainage                         |       |
 
 
-| MPAS NoahMP Name | Description                             | Dims |
-|------------------|-----------------------------------------|------|
-| smoiseq          | volumetric soil moisture [m3/m3]        | 2    |
-| smois            | volumetric soil moisture [m3/m3]        | 2    |
-| sh2o             | volumetric liquid soil moisture [m3/m3] | 2    |
-| tslb             | soil temperature [K]                    | 2    |
-|                  |                                         |      |
+| MPAS NoahMP Name | Description                             | NoahMP Dim | MPAS Dim |
+|------------------|-----------------------------------------|------------|----------|
+| smoiseq          | volumetric soil moisture [m3/m3]        | 2          | 1        |
+| smois            | volumetric soil moisture [m3/m3]        | 2          |          |
+| sh2o             | volumetric liquid soil moisture [m3/m3] | 2          |          |
+| tslb             | soil temperature [K]                    | 2          |          |
+| sfcrunoff        | surface runoff [mm]                     |            |          |
 
 
 ## Geogrid File Creation from MPAS + NoahMP
@@ -209,6 +209,49 @@ flowchart TD
   LU_INDEX --> d01
   LANDMASK --> d01
 
+```
+
+
+### Hydro Timestep Regridding Graph
+```mermaid
+graph LR
+  subgraph HYDRO_Import[WRF-Hydro Import]
+    Hstate_Import[Hydro State]
+  end
+
+  subgraph MPAS_Export[MPAS-Atmos NoahMP Export]
+    Mstate_Export[MPAS State]
+  end
+
+  HYDRO_Import --> Run
+  MPAS_Export --> Run
+  Run --> HYDRO
+  Run --> MPAS
+  Run[Hydro Run Step]
+
+  %% export to hydro
+  Mstate_Export -- "infxsrt" --> Hstate_Import
+  Mstate_Export -- "soldrain" --> Hstate_Import
+  Mstate_Export -- "stc{1-4}" --> Hstate_Import
+  Mstate_Export -- "sh2ox{1-4}" --> Hstate_Import
+  Mstate_Export -- "smc{1-4}" --> Hstate_Import
+  %% Mstate -- "vegtyp" --> Hstate
+
+  %% ---------------------------------
+
+  subgraph HYDRO[WRF-Hydro Export]
+    Hstate[Hydro State]
+  end
+
+  subgraph MPAS[MPAS-Atmos NoahMP Import]
+    Mstate[MPAS State]
+  end
+
+  %% export only
+  Hstate -- "sfchead" --> Mstate
+  %% import and export
+  Hstate --> |"smc{1-4}" | Mstate
+  Hstate --> |"sh2o{1-4}"| Mstate
 ```
 
 
