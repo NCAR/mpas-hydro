@@ -88,13 +88,64 @@ $ jupyter lab
 ```
 
 Edit a jupyter notebook to have something similar the following
-```
+```python
 import uxarray as ux
 uxds_orig = ux.open_dataset("x1.40962.grid.nc", "output.nc")
 uxds = uxds_orig.isel(Time=0)
 uxds.uxgrid = uxds_orig.uxgrid  # reattach grid after selection for time
 uxds['ter'].plot()
 ```
+
+
+#### Geotiff
+The following code show how to export a variable to geotiff formst.
+```python
+import cartopy.crs as ccrs
+import matplotlib.pyplot as plt
+import numpy as np
+import rasterio
+from rasterio.transform import from_bounds
+import uxarray as ux
+
+# --- Open mesh and read lat/lon bounds ---
+dir = '/glade/derecho/scratch/soren/src/wrf-hydro/mpas_testcases/front_range_CO_noahmp_1km/'
+f = dir + '2way_2hr_1np/history.2013-09-10_00.00.00.nc'
+mpas = ux.open_dataset(dir+"frontrange.grid.nc", f,
+                    decode_times=False, grid_kwargs={"decode_times": False, "drop_variables": ["Time"]},)
+
+lon = mpas.uxgrid.face_lon.values
+lat = mpas.uxgrid.face_lat.values
+lon_min, lon_max = lon.min(), lon.max()
+lat_min, lat_max = lat.min(), lat.max()
+
+# --- read variable as raster and plot ---
+var = 'sfcheadrt'
+fig, ax = plt.subplots(subplot_kw={"projection": ccrs.Robinson()})
+ax.set_extent([lon_min, lon_max, lat_min, lat_max],
+              crs=ccrs.PlateCarree())
+raster = mpas['isltyp'].to_raster(ax=ax)
+ny, nx = raster.shape
+transform = from_bounds(lon_min, lat_min, lon_max, lat_max, nx, ny)
+ax.imshow(raster, origin="lower", extent=ax.get_xlim() + ax.get_ylim())
+
+# --- write geotiff file ---
+with rasterio.open(
+    dir+'frontrange.tif',
+    "w",
+    driver="GTiff",
+    height=ny,
+    width=nx,
+    count=1,
+    dtype="float32",
+    crs="EPSG:4326",
+    transform=transform,
+    nodata=np.nan,
+    compress="deflate",
+) as dst:
+    dst.write(raster, 1)
+```
+
+
 
 ## NUOPC Cap Exchange
 - [ ] Add list of variables being exchanged for two and one way coupling
