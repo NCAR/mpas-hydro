@@ -26,9 +26,6 @@ $ ml ncarenv/24.12 gcc/12.4.0 ncarcompilers cray-mpich cmake openblas parallelio
 $ ml esmf/8.8.1 netcdf-mpi/4.9.3 parallel-netcdf hdf5-mpi
 ```
 
-
-
-
 ### Retrieve Code
 ```
 Retrieve repository
@@ -56,18 +53,101 @@ $ make build
 ```
 
 
+## Preprocessing Steps
+### NoahMP Files
+The NoahMP in MPAS is the refactored version and requires the refactored `NoahmpTable.TBL` version.
+The [MPTABLE.TBL](https://github.com/NCAR/wrf_hydro_nwm_public/blob/main/src/Land_models/NoahMP/run/MPTABLE.TBL)
+from the WRF-Hydro repository will not work.
+Variables like `LOW_DENSITY_RESIDENTIAL` and an urban Local Climate Zone (LCZ) classification scheme.
+It would need to be renamed `NoahmpTable.TBL` and even then will lead to `Fortran runtime error: End of file` errors.
+
+### METIS
+Build [Metis](https://github.com/KarypisLab/METIS), it will install in `$HOME/local`
+METIS takes the testcase.graph.info file which has all the grid information, and decides
+  how to split a mesh node between np partitions.
+
+#### Build METIS
+```
+# Build Dependecy GKlib
+$ cd ${RUN_DIRECTORY}
+$ git clone git@github.com:KarypisLab/GKlib.git gklib
+$ cd gklib
+$ make config
+$ make -j 4
+$ make install
+
+# Build metis
+$ cd ${RUN_DIRECTORY}
+$ git clone git@github.com:KarypisLab/METIS.git metis
+$ cd metis
+$ make config gklib_path=$HOME/local/lib64
+$ make -j 4
+$ make install
+```
+
+#### Run METIS
+Run Metis to create `np` partitions where `np` is the number of processes used to run MPI.
+```
+$ cd ${RUN_DIRECTORY}
+$ gpmetis -ptype=kway -contig -minconn -ufactor=1 frontrange.graph.info ${np}
+```
+
+
+### SCRIP
+ESMF cannot currently read the native MPAS mesh format.
+The MPAS mesh file needs to be converted to SCRIP format so ESMF can easily read the mesh to regrid.
+
+#### Build SCRIP
+```
+$ conda activate mpas_tools
+$ conda install -c conda-forge mpas_tools
+```
+#### Run SCRIP
+```
+$ scrip_from_mpas -m testcase.grid.nc -s testcase.scrip.nc
+```
+
 
 
 ## Run Instructions
-Setup a case, one could download a [MPAS testcase](https://www2.mmm.ucar.edu/projects/mpas/test_cases/v7.0/).
-Make sure that `esmxRun.yaml, init_atmosphere_model` and `mpas_hydro` are present in the directory.
+<!-- Setup a case, one could download a [MPAS testcase](https://www2.mmm.ucar.edu/projects/mpas/test_cases/v7.0/). -->
+<!-- Make sure that `esmxRun.yaml, init_atmosphere_model` and `mpas_hydro` are present in the directory. -->
 
+<!-- ``` -->
+<!-- Run initialization executable -->
+<!-- $ ./init_atmosphere_model -->
+<!-- Run MPAS Hydro -->
+<!-- $ mpirun -np 4 ./mpas_hydro -->
+<!-- ``` -->
+
+- Setup testcase
+
+- Edit the following files to have the same start date
+  - esmxRun.yaml
+  - namelist.atmosphere
+  - hydro.namelist
+
+
+- NOTE: the first time running a case, run with `-np 1` so `hydro.fullres.nc` will be created.
+
+```bash
+# Run with np=1 first to create hydro.fullres.nc
+$ LD_LIBRARY_PATH=/path/to/src/build/install/lib64/:${LD_LIBRARY_PATH} \
+    mpirun -np 1 ./mpas_hydro
+$ LD_LIBRARY_PATH=/path/to/src/build/install/lib64/:${LD_LIBRARY_PATH} \
+    mpirun -np 4 ./mpas_hydro
 ```
-Run initialization executable
-$ ./init_atmosphere_model
-Run MPAS Hydro
-$ mpirun -np 4 ./mpas_hydro
-```
+
+### Restarts
+To restart the models the following options will need to be updated
+- `esmxRun.yaml`
+  - `startTime: 2011-09-10T06:00:00` under `App`
+- `atmosphere.namelist`
+  - `config_start_time = '2013-09-10_06:00:00'` under `&nhyyd_model`
+  - `config_do_restart = true` under `&restart`
+- `hydro.namelist`
+  - `RESTART_FILE = 'HYDRO_RST.2011-09-10_06:00_DOMAIN2'` under `&HYDRO_nlist`
+
 
 
 ## Visualize Output
@@ -82,18 +162,62 @@ $ conda install -c conda-forge uxarray jupyterlab
 ```
 
 ### Visualization
-Start JupyterLab
-```
-$ jupyter lab
-```
+The xarray extension [UXarray](https://uxarray.readthedocs.io/en/latest/index.html) is used to visualize the MPAS meshes.
+Follow the instructions to [install uxarray](https://uxarray.readthedocs.io/en/latest/getting-started/installation.html)
+or if the user is on Derecho they can use an NPL library.
+The following commands are specifically for use within a Jupyter notebook.
 
-Edit a jupyter notebook to have something similar the following
+#### Basic Mesh Plotting
 ```python
 import uxarray as ux
 uxds_orig = ux.open_dataset("x1.40962.grid.nc", "output.nc")
 uxds = uxds_orig.isel(Time=0)
 uxds.uxgrid = uxds_orig.uxgrid  # reattach grid after selection for time
 uxds['ter'].plot()
+
+mesh_grid = 'frontrange.grid.nc'
+mesh_file = 'history.2013-09-10_00.00.00.nc' # or any mesh file
+ux.open_dataset(mesh_grid, mesh_file, decode_times=False,
+                grid_kwargs={"decode_times": False, "drop_variables": ["Time"]},)
+mpas['ter'].isel(Time=0).plot()
+```
+The simplest way is to use `.plot()`.
+In a Jupyter notebook, only the last expression in a cell is auto-displayed.
+If there are multiple plot statements adding `display()` is needed on all but the last.
+
+```python
+display(mpas['smois'].plot())
+mpas['isltyp'].plot()
+```
+
+The `.plot()` will return a plot object that can be used later.
+This is extremely usefull for plotting meshes side-by-side with the `(p1 + p2)` statement.
+
+```python
+p1 = mpas['vegfra'].isel(Time=0, drop=True).plot()
+p2 = mpas['isltyp'].plot(cmap='tab20')
+(p1 + p2)
+```
+
+If the width of the plots is too wide, they can be reduced by passing arguments to opts.
+
+```python
+p = 0.7
+w = int(p1.opts["width"] * p)
+h = int(p1.opts["height"] * p)
+(p1.opts(width=w, height=h) + p2.opts(width=w, height=h) + p3.opts(width=w, height=h))
+```
+Plot a mesh cutout over the hydro domain
+```python
+hydro_dom = xr.open_dataset(dir + 'Fulldom_hires.nc')
+lon_min = float(hydro_dom['LONGITUDE'][0, :].min())
+lon_max = float(hydro_dom['LONGITUDE'][0, :].max())
+lat_min = float(hydro_dom['LATITUDE'][:, 0].min())
+lat_max = float(hydro_dom['LATITUDE'][:, 0].max())
+lon_bounds = (lon_min, lon_max)
+lat_bounds = (lat_min, lat_max)
+mpas['sfcheadrt'].subset.bounding_box(lon_bounds=lon_bounds, lat_bounds=lat_bounds).plot()
+
 ```
 
 
@@ -194,7 +318,7 @@ Variables in file `src/core_atmosphere/physics/mpas_atmphys_vars.F` and the Noah
 | `surface_runoff_accumulated`                   | `sfcrunoff` |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
 | `surface_water_depth`                          | `sfchead`   |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
 | `time_step_infiltration_excess`                | `soldrain`  |                                |                     | `ESMF_REGRIDMETHOD_BILINEAR`     |
-| `vegetation_type`                              | `vegtyp`    |                                |                     | `ESMF_REGRIDMETHOD_NEAREST_STOD` |
+| `vegetation_type`                              | `lu_index`  |                                |                     | `ESMF_REGRIDMETHOD_NEAREST_STOD` |
 
 
 
@@ -219,12 +343,11 @@ Variables needed
 
 
 ## Geogrid File Creation from MPAS + NoahMP
-The geogrid file is created at runtime by using importing variables from MPAS
+The geogrid `hydro.fullres.nc` file is created at runtime by using importing variables from MPAS
 
 | MPAS Variable | description                 | Hydro Geo Var | description                   | Regrid Method |
 |---------------|-----------------------------|---------------|-------------------------------|---------------|
 | isltyp        | soil type index             | SCT_DOM       | Dominant top layer soil class | Nearest Stod  |
-| ivgtyp        | vegetation type index       | VEGTYP        | Vegetation type               | Nearest Stod  |
 | ivgtyp        | vegetation type index       | LU\_INDEX     | Land cover type               | Nearest Stod  |
 | landmask      |                             | LANDMASK      |                               | Nearest Stod  |
 | ter           | terrain height, in .init.nc | HGT\_M        | Elevation                     | Bilinear      |
@@ -235,7 +358,7 @@ The geogrid file is created at runtime by using importing variables from MPAS
 ```mermaid
 flowchart TD
   frontrange(((frontrange.static.nc)))
-  d01(((frontrange.d01.nc)))
+  d01(((hydro.fullres.nc)))
   frontrange --> isltyp
   frontrange --> ivgtyp
   frontrange --> ivgtyp
@@ -245,7 +368,6 @@ flowchart TD
   frontrange --> lonCell
 
   isltyp -- nearest_stod --> SCT_DOM
-  ivgtyp -- nearest_stod --> VEGTYP
   ivgtyp -- nearest_stod --> LU_INDEX
   landmask -- nearest_stod --> LANDMASK
   ter -- bilinear --> HGT_M
@@ -256,7 +378,6 @@ flowchart TD
   SCT_DOM --> d01
   XLAT_M --> d01
   XLONG_M --> d01
-  VEGTYP --> d01
   LU_INDEX --> d01
   LANDMASK --> d01
 
@@ -286,7 +407,6 @@ graph LR
   Mstate_Export -- "stc{1-4}" --> Hstate_Import
   Mstate_Export -- "sh2ox{1-4}" --> Hstate_Import
   Mstate_Export -- "smc{1-4}" --> Hstate_Import
-  %% Mstate -- "vegtyp" --> Hstate
 
   %% ---------------------------------
 
